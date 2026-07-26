@@ -40,31 +40,82 @@ void UnitBaseAirNavigator::Update( UnitAirMoveCommand &MoveCommand )
 
 	bool bIsAtMinDesiredHeight = m_fCurrentHeight >= m_fDesiredHeight;
 
-	BaseClass::Update( MoveCommand );
+	BaseClass::Update(MoveCommand);
 
 	// Calculate upmove if needed
 	MoveCommand.upmove = 0.0f;
-	if( GetPath()->m_iGoalType != GOALTYPE_NONE && GetPath()->GetCurWaypoint() )
+
+	if (GetPath()->m_iGoalType == GOALTYPE_NONE ||
+		!GetPath()->GetCurWaypoint())
 	{
-		bool bCurTargetIsGoal = (GetPath()->m_iGoalType == GOALTYPE_TARGETENT || GetPath()->m_iGoalType == GOALTYPE_TARGETENT_INRANGE) && GetPath()->CurWaypointIsGoal();
+		return;
+	}
 
-		float fTargetZ = GetPath()->GetCurWaypoint()->GetPos().z + (-GetOuter()->CollisionProp()->OBBMins().z);
-		if( m_LastGoalStatus == CHS_CLIMBDEST || !bCurTargetIsGoal )
-			fTargetZ += m_fDesiredHeight;
+	bool bCurTargetIsGoal = (GetPath()->m_iGoalType == GOALTYPE_TARGETENT || GetPath()->m_iGoalType == GOALTYPE_TARGETENT_INRANGE) && GetPath()->CurWaypointIsGoal();
 
-		if( m_LastGoalStatus == CHS_CLIMBDEST || bCurTargetIsGoal )
+	float fTargetZ = GetPath()->GetCurWaypoint()->GetPos().z + (-GetOuter()->CollisionProp()->OBBMins().z);
+
+	CBaseEntity *pTarget = nullptr;
+	UnitBaseAirNavigator *pTargetAirNavigator = nullptr;
+
+	if( bCurTargetIsGoal && GetPath()->m_hTarget )
+	{
+		pTarget = GetPath()->m_hTarget.Get();
+
+		if( pTarget && pTarget->MyUnitPointer() )
 		{
-			if( fTargetZ > GetAbsOrigin().z )
+			pTargetAirNavigator = dynamic_cast<UnitBaseAirNavigator *>(pTarget->MyUnitPointer()->GetNavigator());
+		}
+	}
+
+	if( !pTargetAirNavigator )
+	{
+		if( m_LastGoalStatus == CHS_CLIMBDEST || !bCurTargetIsGoal )fTargetZ += m_fDesiredHeight;
+	}
+
+	if( m_LastGoalStatus == CHS_CLIMBDEST || bCurTargetIsGoal )
+	{
+		float flDelta = fTargetZ - GetAbsOrigin().z;
+
+		if( m_LastGoalStatus == CHS_CLIMBDEST )
+		{
+			if( flDelta > 0.0f )
 			{
 				// Calculate needed up movement
 				MoveCommand.upmove = Max( -MoveCommand.maxspeed, Min(
-					(fTargetZ - GetAbsOrigin().z) / MoveCommand.interval,
+					flDelta / MoveCommand.interval,
 					MoveCommand.maxspeed
-				) );
+					) );
+			}
+		}
+		else if( pTargetAirNavigator && pTarget )
+		{
+			Vector myMins, myMaxs;
+			Vector targetMins, targetMaxs;
 
-				// Zero out other movement (so we don't bump into a cliff or wall)
-				if( m_LastGoalStatus == CHS_CLIMBDEST )
-					MoveCommand.forwardmove = MoveCommand.sidemove = 0.0f;
+			GetOuter()->CollisionProp()->WorldSpaceAABB(&myMins, &myMaxs);
+			pTarget->CollisionProp()->WorldSpaceAABB(&targetMins, &targetMaxs);
+
+			const float flVerticalTolerance = 16.0f;
+			flDelta = targetMins.z - myMaxs.z;
+
+			if (flDelta > flVerticalTolerance)
+			{
+				MoveCommand.upmove = Max( -MoveCommand.maxspeed, Min(
+					flDelta / MoveCommand.interval,
+					MoveCommand.maxspeed
+					) );
+			}
+		}
+		else
+		{
+			if( flDelta > 0.0f )
+			{
+				// Calculate needed up movement
+				MoveCommand.upmove = Max( -MoveCommand.maxspeed, Min(
+					flDelta / MoveCommand.interval,
+					MoveCommand.maxspeed
+					) );
 			}
 			else if( fTargetZ > GetAbsOrigin().z && bIsAtMinDesiredHeight )
 			{
@@ -72,11 +123,15 @@ void UnitBaseAirNavigator::Update( UnitAirMoveCommand &MoveCommand )
 				MoveCommand.upmove = 1.0f;
 			}
 		}
-		else if( fTargetZ > GetAbsOrigin().z && bIsAtMinDesiredHeight )
-		{
-			// Avoid going down again to prevent navigation issues
-			MoveCommand.upmove = 1.0f;
-		}
+
+		// Zero out other movement (so we don't bump into a cliff or wall)
+		if( m_LastGoalStatus == CHS_CLIMBDEST )
+			MoveCommand.forwardmove = MoveCommand.sidemove = 0.0f;
+	}
+	else if( fTargetZ > GetAbsOrigin().z && bIsAtMinDesiredHeight )
+	{
+		// Avoid going down again to prevent navigation issues
+		MoveCommand.upmove = 1.0f;
 	}
 }
 

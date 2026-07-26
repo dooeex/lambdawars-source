@@ -20,24 +20,24 @@ class UnitBaseAirNavigator : public UnitBaseNavigator
 
 public:
 #ifdef ENABLE_PYTHON
-	UnitBaseAirNavigator( boost::python::object outer );
+	UnitBaseAirNavigator(boost::python::object outer);
 #endif // ENABLE_PYTHON
 
-	virtual void		Update( UnitAirMoveCommand &mv );
-	virtual CheckGoalStatus_t	MoveUpdateWaypoint( UnitBaseMoveCommand &MoveCommand );
+	virtual void		Update(UnitAirMoveCommand &mv);
+	virtual CheckGoalStatus_t	MoveUpdateWaypoint(UnitBaseMoveCommand &MoveCommand);
 
-	virtual UnitBaseWaypoint *	BuildLocalPath( const Vector &pos );
-	virtual UnitBaseWaypoint *	BuildNavAreaPath( UnitBasePath *pPath, const Vector &pos );
+	virtual UnitBaseWaypoint *	BuildLocalPath(const Vector &pos);
+	virtual UnitBaseWaypoint *	BuildNavAreaPath(UnitBasePath *pPath, const Vector &pos);
 
-	virtual bool		ShouldConsiderNavMesh( void );
+	virtual bool		ShouldConsiderNavMesh(void);
 
 	//virtual bool		TestRoute( const Vector &vStartPos, const Vector &vEndPos );
 
 	bool GetTestRouteWorldOnly();
-	void SetTestRouteWorldOnly( bool enable );
+	void SetTestRouteWorldOnly(bool enable);
 
 	bool GetUseSimplifiedRouteBuilding();
-	void SetUseSimplifiedRouteBuilding( bool enable );
+	void SetUseSimplifiedRouteBuilding(bool enable);
 
 	virtual CRecastMesh *GetNavMesh();
 
@@ -49,7 +49,7 @@ private:
 };
 
 // Inlines
-inline bool UnitBaseAirNavigator::ShouldConsiderNavMesh( void )
+inline bool UnitBaseAirNavigator::ShouldConsiderNavMesh(void)
 {
 	return false; // Never add density from nav areas
 }
@@ -59,7 +59,7 @@ inline bool UnitBaseAirNavigator::GetTestRouteWorldOnly()
 	return m_bTestRouteWorldOnly;
 }
 
-inline void UnitBaseAirNavigator::SetTestRouteWorldOnly( bool enable )
+inline void UnitBaseAirNavigator::SetTestRouteWorldOnly(bool enable)
 {
 	m_bTestRouteWorldOnly = enable;
 }
@@ -69,7 +69,7 @@ inline bool UnitBaseAirNavigator::GetUseSimplifiedRouteBuilding()
 	return m_bUseSimplifiedRouteBuilding;
 }
 
-inline void UnitBaseAirNavigator::SetUseSimplifiedRouteBuilding( bool enable )
+inline void UnitBaseAirNavigator::SetUseSimplifiedRouteBuilding(bool enable)
 {
 	m_bUseSimplifiedRouteBuilding = enable;
 }
