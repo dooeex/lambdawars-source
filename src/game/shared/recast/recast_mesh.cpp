@@ -909,7 +909,7 @@ UnitBaseWaypoint * CRecastMesh::FindPath( const Vector &vStart, const Vector &vE
 
 	bool bHasTargetAndIsObstacle = pTarget && pTarget->GetNavObstacleRef() != NAV_OBSTACLE_INVALID_INDEX;
 
-	status = ComputeAdjustedStartAndEnd( m_navQuery, spos, epos, startRef, endRef, fBeneathLimit, bHasTargetAndIsObstacle, pTarget != NULL, pStartTestPos );
+	status = ComputeAdjustedStartAndEnd(m_navQuery, spos, epos, startRef, endRef, fBeneathLimit, bHasTargetAndIsObstacle, false, pStartTestPos);
 	if( !dtStatusSucceed( status ) )
 	{
 		return NULL;

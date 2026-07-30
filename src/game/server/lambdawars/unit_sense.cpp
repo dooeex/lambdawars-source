@@ -245,13 +245,9 @@ int UnitBaseSense::LookForUnits( int iDistance )
 			if( iAttackPriority > iBestAttackPriority 
 				|| (iAttackPriority == iBestAttackPriority && otherDist < fBestEnemyDist) )
 			{
-				bool bReachable = !pMesh || pMesh->FindPathDistance( origin, pOther->GetAbsOrigin(), pOther, 1024.0f, true ) >= 0;
-				if( bReachable )
-				{
-					fBestEnemyDist = otherDist;
-					m_hNearestEnemy = pOther;
-					iBestAttackPriority = iAttackPriority;
-				}
+				fBestEnemyDist = otherDist;
+				m_hNearestEnemy = pOther;
+				iBestAttackPriority = iAttackPriority;
 			}
 		}
 		else
