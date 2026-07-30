@@ -855,7 +855,35 @@ void CUnitBase::UpdateEnemy( UnitBaseSense &senses )
 	}
 
 	CBaseEntity *pEnemy = GetEnemy();
-	CBaseEntity *pBest = senses.GetNearestEnemy();
+	CBaseEntity *pBest = NULL;
+	int iBestPriority = -1000;
+	float flBestDist = FLT_MAX;
+
+	for (int i = 0; i < senses.m_SeenEnemies.Count(); i++)
+	{
+		CBaseEntity *pTest = senses.m_SeenEnemies[i].entity;
+		if (!pTest)
+			continue;
+
+		if (!HasRangeAttackLOSTarget(pTest))
+			continue;
+
+		int iPriority = IRelationPriority(pTest);
+		float flDist = GetAbsOrigin().DistToSqr(pTest->GetAbsOrigin());
+
+		if (iPriority > iBestPriority ||
+			(iPriority == iBestPriority && flDist < flBestDist))
+		{
+			pBest = pTest;
+			iBestPriority = iPriority;
+			flBestDist = flDist;
+		}
+	}
+
+	if (!pBest)
+	{
+		pBest = senses.GetNearestEnemy();
+	}
 
 	if( pBest && pEnemy )
 	{
