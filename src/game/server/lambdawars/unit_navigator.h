@@ -216,14 +216,14 @@ public:
 #endif // ENABLE_PYTHON
 
 		// Copy waypoints
-		if (src.m_pWaypointHead)
+		if( src.m_pWaypointHead )
 		{
 			UnitBaseWaypoint *pPrev = NULL;
 			const UnitBaseWaypoint *pSrc = src.m_pWaypointHead;
 
 			m_pWaypointHead = NULL;
 
-			while (pSrc)
+			while( pSrc )
 			{
 				UnitBaseWaypoint *pNew = new UnitBaseWaypoint(*pSrc);
 
