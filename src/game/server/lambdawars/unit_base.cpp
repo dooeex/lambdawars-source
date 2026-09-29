@@ -758,7 +758,8 @@ bool CUnitBase::HasRangeAttackLOS( const Vector &vTargetPos, CBaseEntity *pTarge
 	{
 		trace_t result;
 		CUnitLOSFilter traceFilter( this, pTarget, GetCollisionGroup() );
-		UTIL_TraceLine( EyePosition(), vTargetPos, m_iAttackLOSMask, &traceFilter, &result );
+		Vector targetPos = pTarget ? pTarget->BodyTarget(EyePosition(), false) : vTargetPos;
+		UTIL_TraceLine(EyePosition(), targetPos, m_iAttackLOSMask | CONTENTS_WINDOW, &traceFilter, &result);
 		if( g_debug_rangeattacklos.GetBool() )
 			NDebugOverlay::Line( EyePosition(), result.endpos, 0, 255, 0, true, 1.0f );
 		m_bHasRangeAttackLOS = (result.fraction == 1.0f);
